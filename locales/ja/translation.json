@@ -1,0 +1,86 @@
+{
+  "severityFilter": {
+    "countHtml": "{{text}} <span class=\"sr-only\">の問題点</span>"
+  },
+  "columnSettingForm": {
+    "title": "表示列設定"
+  },
+  "downloadForm": {
+    "title": "ダウンロード"
+  },
+  "keywordSearchForm": {
+    "title": "検索",
+    "keywordInput": "検索文字列"
+  },
+  "navbar": {
+    "setting": "設定",
+    "quit": "終了",
+    "close": "閉じる",
+    "eyesight": "視力",
+    "cvd": "色覚異常",
+    "filter": "水晶体透過率",
+    "filterDescription": "0.6: 60歳代, 0.8: 40歳代, 1.0: 20歳代"
+  },
+  "mainForm": {
+    "url": "URL",
+    "validation": "検証",
+    "help": "検証したい URL を入力し、「検証」ボタンをクリックしてください。"
+  },
+  "problemTable": {
+    "severity": "問題の種類",
+    "highlightPaths": "ハイライト",
+    "perceivable": "$t(enum.metrics.perceivable)",
+    "operable": "$t(enum.metrics.operable)",
+    "understandable": "$t(enum.metrics.understandable)",
+    "robust": "$t(enum.metrics.robust)",
+    "wcag2": "$t(enum.guidelines.wcag2)",
+    "section508": "$t(enum.guidelines.section508)",
+    "jis": "$t(enum.guidelines.jis)",
+    "techniques": "達成方法",
+    "description": "内容",
+    "foreground": "前景色",
+    "background": "背景色",
+    "x": "X座標",
+    "y": "Y座標",
+    "area": "面積",
+    "type": "種類",
+    "severityLV": "深刻度",
+    "validating": "検証中 ...",
+    "noResult": "結果がありません。"
+  },
+  "htmlCheckerTab": {
+    "title": "アクセシビリティ検証"
+  },
+  "lowVisionTab": {
+    "title": "視覚化"
+  },
+  "enum": {
+    "severities": {
+      "all": "すべての項目",
+      "essential": "問題あり",
+      "warning": "問題の可能性大",
+      "userCheck": "要判断箇所",
+      "info": "手動確認"
+    },
+    "fieldStates": {
+      "show": "表示",
+      "hide": "非表示"
+    },
+    "cvd": {
+      "protan": "第一色覚異常（赤色覚異常）",
+      "deutan": "第二色覚異常（緑色覚異常）",
+      "tritan": "第三色覚異常（青色覚異常）"
+    },
+    "metrics": {
+      "perceivable": "知覚可能",
+      "operable": "知覚可能",
+      "understandable": "理解可能",
+      "robust": "堅ろう（牢）"
+    },
+    "guidelines": {
+      "wcag2": "WCAG 2.0",
+      "section508": "Section508",
+      "jis": "JIS"
+    }
+  }
+}

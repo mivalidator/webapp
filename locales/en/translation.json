@@ -1,0 +1,87 @@
+{
+  "severityFilter": {
+    "countHtml": "{{text}} <span class=\"sr-only\">problem</span>",
+    "countHtml_plural": "{{text}} <span class=\"sr-only\">problems</span>"
+  },
+  "columnSettingForm": {
+    "title": "Column Setting"
+  },
+  "downloadForm": {
+    "title": "Download"
+  },
+  "keywordSearchForm": {
+    "title": "Search",
+    "keywordInput": "Search Text"
+  },
+  "navbar": {
+    "setting": "Settings",
+    "quit": "Quit",
+    "close": "Close",
+    "eyesight": "EyeSight",
+    "cvd": "ColorVision",
+    "filter": "ColorFilter",
+    "filterDescription": "0.6: 60's, 0.8: 40's, 1.0: 20's"
+  },
+  "mainForm": {
+    "url": "URL",
+    "validation": "Validate",
+    "help": "Put url to validate and press button below."
+  },
+  "problemTable": {
+    "severity": "Severity",
+    "highlightPaths": "Highlight",
+    "perceivable": "$t(enum.metrics.perceivable)",
+    "operable": "$t(enum.metrics.operable)",
+    "understandable": "$t(enum.metrics.understandable)",
+    "robust": "$t(enum.metrics.robust)",
+    "wcag2": "$t(enum.guidelines.wcag2)",
+    "section508": "$t(enum.guidelines.section508)",
+    "jis": "$t(enum.guidelines.jis)",
+    "techniques": "Techniques",
+    "description": "Description",
+    "foreground": "Foreground Color",
+    "background": "Background Color",
+    "x": "X",
+    "y": "Y",
+    "area": "Area",
+    "type": "Type",
+    "severityLV": "Severity Level",
+    "validating": "Validating ...",
+    "noResult": "There are no results"
+  },
+  "htmlCheckerTab": {
+    "title": "Accessibility"
+  },
+  "lowVisionTab": {
+    "title": "Low Vision"
+  },
+  "enum": {
+    "severities": {
+      "all": "All Items",
+      "essential": "Error",
+      "warning": "Probably Error",
+      "userCheck": "Need confirmation",
+      "info": "Human check"
+    },
+    "fieldStates": {
+      "show": "Show",
+      "hide": "Hide"
+    },
+    "cvd": {
+      "protan": "Protan: Abnormality of red-sensitive cone pigment",
+      "deutan": "Deutan: Abnormality of green-sensitive cone pigment",
+      "tritan": "Tritan: Abnormality of blue-sensitive cone pigment"
+    },
+    "metrics": {
+      "perceivable": "Perceivable",
+      "operable": "Operable",
+      "understandable": "Understandable",
+      "robust": "Robust"
+    },
+    "guidelines": {
+      "wcag2": "WCAG 2.0",
+      "section508": "Section508",
+      "jis": "JIS"
+    }
+  }
+}

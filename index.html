@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>mivalidator | html5 accessibility and low vision validator</title>
+  <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap@4.5.0/dist/css/bootstrap.min.css" />
+  <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap-vue@2.15.0/dist/bootstrap-vue.min.css" />
+  <style type="text/css">
+    th.mivalidator-severity div {
+      min-width: 8em;
+    }
+    th.mivalidator-metric0 div,
+    th.mivalidator-metric1 div,
+    th.mivalidator-metric2 div,
+    th.mivalidator-metric3 div {
+      min-width: 10em;
+    }
+    th.mivalidator-guideline0 div,
+    th.mivalidator-guideline1 div,
+    th.mivalidator-guideline2 div {
+      min-width: 10em;
+    }
+    th.mivalidator-techniques div {
+      min-width: 10em;
+    }
+    th.mivalidator-highlight-paths div {
+      min-width: 10em;
+    }
+    th.mivalidator-description div {
+      min-width: 30em;
+    }
+    th.mivalidator-severity-lv div,
+    th.mivalidator-x div,
+    th.mivalidator-y div,
+    th.mivalidator-area div {
+      min-width: 4em;
+    }
+    th.mivalidator-foreground div,
+    th.mivalidator-background div {
+      min-width: 7em;
+    }
+    .btn-mivalidator-highlighter ~ .btn-mivalidator-highlighter {
+      margin-left: 4px;
+    }
+    .mivalidator-lowvision-image {
+      width: 100%;
+    }
+  </style>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es2015%2CIntersectionObserver" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/vue@2.6.11/dist/vue.min.js"></script>
+  <script src="https://unpkg.com/bootstrap-vue@2.15.0/dist/bootstrap-vue.min.js"></script>
+  <script src="https://unpkg.com/bootstrap-vue@2.15.0/dist/bootstrap-vue-icons.min.js"></script>
+  <script src="https://unpkg.com/vue-image-compare@0.6.1/dist/vue-image-compare.min.js"></script>
+  <script src="https://unpkg.com/moment@2.27.0/min/moment.min.js"></script>
+  <script src="https://unpkg.com/i18next@19.6.2/dist/umd/i18next.min.js"></script>
+  <script src="https://unpkg.com/i18next-browser-languagedetector@5.0.0/dist/umd/i18nextBrowserLanguageDetector.min.js"></script>
+  <script src="https://unpkg.com/i18next-fetch-backend@3.0.0/dist/i18next-fetch-backend.umd.js"></script>
+</head>
+<body>
+  <div id="splash" class="container-fluid">
+    <div class="mt-3 d-flex align-items-center">
+      <span role="status" class="spinner-border">
+        <span class="sr-only">Loading</span>
+      </span>
+      <span class="ml-2">アプリケーションを起動中です。しばらくお待ちください。</span>
+    </div>
+  </div>
+
+  <div id="app">
+    <mivalidator-navbar :setting="settings" @application-setting-change="saveSettings" @quit-application="quitApplication"></mivalidator-navbar>
+
+    <div class="container" v-if="typeof hostCallback !== 'undefined'">
+      <mivalidator-main-form :url="url" :validating="validating" @validate-page="validatePage($event);"></mivalidator-main-form>
+
+      <div class="mt-3" v-if="validating || Object.keys(result.htmlCheckerProblemData).length > 0 || Object.keys(result.lowVisionProblemData).length > 0">
+        <b-card no-body>
+          <b-tabs pills card lazy v-model="tabIndex">
+            <mivalidator-html-checker-tab :validating="validating" :problem="result.htmlCheckerProblemData"></mivalidator-html-checker-tab>
+
+            <mivalidator-low-vision-tab :validating="validating" :problem="result.lowVisionProblemData"></mivalidator-low-vision-tab>
+          </b-tabs>
+        </b-card>
+      </div>
+    </div> <!-- end of .container -->
+
+  </div> <!-- end of #app -->
+
+  <script type="module">
+    // vue settings
+    Vue.use(BootstrapVue);
+    Vue.use(BootstrapVueIcons);
+    Vue.use(VueImageCompare);
+
+    import Highlighter from "./highlighter.js";
+    Vue.component("mivalidator-highlighter", Highlighter);
+
+    import SeverityFilter from "./severity-filter.js";
+    Vue.component("mivalidator-severity-filter", SeverityFilter);
+
+    import KeywordSearchForm from "./keyword-search-form.js";
+    Vue.component("mivalidator-keyword-search-form", KeywordSearchForm);
+
+    import ColumnSettingForm from "./column-setting-form.js";
+    Vue.component("mivalidator-column-setting-form", ColumnSettingForm);
+
+    import DownloadForm from "./download-form.js";
+    Vue.component("mivalidator-download-form", DownloadForm);
+
+    import Navbar from "./navbar.js";
+    Vue.component("mivalidator-navbar", Navbar);
+
+    import MainForm from "./main-form.js";
+    Vue.component("mivalidator-main-form", MainForm);
+
+    import ImageViewer from "./image-viewer.js";
+    Vue.component("mivalidator-image-viewer", ImageViewer);
+
+    import HtmlCheckerTab from "./html-checker-tab.js";
+    Vue.component("mivalidator-html-checker-tab", HtmlCheckerTab);
+
+    import LowVisionTab from "./low-vision-tab.js";
+    Vue.component("mivalidator-low-vision-tab", LowVisionTab);
+
+    const promise1 = new Promise((resolve, reject) => {
+      i18next.use(i18nextBrowserLanguageDetector).use(I18nextFetchBackend).init({
+        fallbackLng: ['en', 'ja'],
+        preload: ['en', 'ja', 'zh'],
+        ns: [ 'translation' ],
+        defaultNS: 'translation',
+        backend: {
+          loadPath: '/webapp/locales/{{lng}}/{{ns}}.json'
+        }
+      }, (err, t) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        resolve();
+      });
+    });
+
+    import { lastTag, sliceMap, escapeCsv, download, convertSeverityIdToName, resolvePromise, rejectPromise } from "./util.js";
+
+    const promise2 = new Promise((resolve, reject) => {
+      window.addEventListener("DOMContentLoaded", (ev) => {
+        resolve();
+      });
+    });
+
+    // 100 means 100 x 0.1 seconds = 10 seconds
+    const MAX_TYRIES = 100;
+
+    const promise3 = new Promise((resolve, reject) => {
+      let numTry = 0;
+      const waitForHostCallback = function() {
+        if (typeof hostCallback !== "undefined") {
+          resolve();
+        } else {
+          numTry += 1;
+          if (numTry >= MAX_TYRIES) {
+            reject("timeout");
+          }
+
+          setTimeout(waitForHostCallback, 100);
+        }
+      };
+
+      waitForHostCallback();
+    });
+
+    Promise.all([promise1, promise2, promise3]).then(() => {
+      const app = new Vue({
+        el: "#app",
+        data: {
+          url: "",
+          validating: false,
+          tabIndex: 0,
+          settings: {
+            lowVision: {
+              eyesight: true,
+              eyesightDegree: 0.5,
+              cvd: true,
+              cvdType: "deutan",
+              colorFilter: true,
+              colorFilterDegree: 0.8
+            }
+          },
+          result: {
+            htmlCheckerProblemData: {},
+            lowVisionProblemData: {},
+          }
+        },
+        created: function() {
+          window.addEventListener("beforeunload", (ev) => {
+            ev.preventDefault();
+            ev.returnValue = '';
+            hostCallback(JSON.stringify({ name: "quit" }));
+          });
+          window.addEventListener("message", (ev) => {
+            console.log({ on: "message", ev: ev, data: ev.data })
+
+            switch (ev.data.name) {
+              case "mivalidator.settings":
+                this.settings.lowVision.eyesight = ev.data.lowVision.eyesight;
+                this.settings.lowVision.eyesightDegree = ev.data.lowVision.eyesightDegree;
+                this.settings.lowVision.cvd = ev.data.lowVision.cvd;
+                this.settings.lowVision.cvdType = ev.data.lowVision.cvdTypeName;
+                this.settings.lowVision.colorFilter = ev.data.lowVision.colorFilter;
+                this.settings.lowVision.colorFilterDegree = ev.data.lowVision.colorFilterDegree;
+                break;
+              case "mivalidator.validating":
+                this.validating = true;
+                this.result.htmlCheckerProblemData = {};
+                this.result.lowVisionProblemData = {};
+                this.tabIndex = 0;
+                break;
+              case "mivalidator.completed":
+                this.validating = false;
+                break;
+              case "mivalidator.htmlChecker.result":
+                this.result.htmlCheckerProblemData = sliceMap(ev.data, [ "name", "tabId", "url" ]);
+                this.result.htmlCheckerProblemData.problems = Array.from(ev.data.problems, (problem) => {
+                  return sliceMap(problem, [
+                    "canHighlight", "description", "evaluationItem", "highlightTargetPaths", "lineStrMulti",
+                    "severity", "severityStr"
+                  ]);
+                });
+                break;
+              case "mivalidator.htmlChecker.error":
+                this.result.htmlCheckerProblemData = sliceMap(ev.data, [ "name", "tabId", "url", "errorClass", "errorMessage", "errorTraces" ]);
+                this.result.htmlCheckerProblemData.problems = [];
+                break;
+              case "mivalidator.lowVision.result":
+                this.result.lowVisionProblemData = sliceMap(ev.data, [ "name", "tabId", "url", "sourceImageDataUrl", "outputImageDataUrl" ]);
+                this.result.lowVisionProblemData.problems = Array.from(ev.data.problems, (problem) => {
+                  return sliceMap(problem, [
+                    "canHighlight", "description", "evaluationItem", "highlightTargetPaths", "lineStrMulti",
+                    "severity", "severityStr", "severityLV", "foreground", "background", "x", "y", "area", "cssPath"
+                  ]);
+                });
+                break;
+              case "mivalidator.lowVision.error":
+                this.result.lowVisionProblemData = sliceMap(ev.data, [ "name", "tabId", "url", "errorClass", "errorMessage", "errorTraces" ]);
+                this.result.lowVisionProblemData.problems = [];
+                break;
+              case "mivalidator.stateSuccess":
+                resolvePromise(ev.data.state);
+                break;
+              case "mivalidator.stateError":
+                rejectPromise(ev.data.state, sliceMap(ev.data, [ "name", "state", "errorClass", "errorMessage", "errorTraces" ]));
+                break;
+            }
+          });
+
+          const lastUrl = sessionStorage.getItem("lastUrl");
+          if (lastUrl) {
+            this.url = lastUrl;
+          }
+
+          hostCallback(JSON.stringify({ name: "syncSettings" }));
+
+          document.getElementById("splash").remove();
+        },
+        methods: {
+          validatePage: function(url) {
+            if (url) {
+              this.url = url;
+            }
+            if (! this.url) {
+              return;
+            }
+
+            this.validating = true;
+            this.result.htmlCheckerProblemData = {};
+            this.result.lowVisionProblemData = {};
+            this.tabIndex = 0;
+
+            hostCallback(JSON.stringify({ name: "open", payload: { url: this.url } }));
+            sessionStorage.setItem("lastUrl", this.url);
+          },
+          quitApplication: function() {
+            hostCallback(JSON.stringify({ name: "quit" }));
+          },
+          saveSettings: function() {
+            hostCallback(JSON.stringify({ name: "setSettings", payload: this.settings }));
+          },
+        }
+      });
+    }).catch(() => {
+      document.getElementById("splash").innerHTML = "<p>アプリケーションの起動に失敗しました。</p><p>ブラウザで直接 URL へアクセスしても mivalidator はご利用いただけません。プログラムから起動してください。</p>";
+    });
+   </script>
+</body>
+</html>
